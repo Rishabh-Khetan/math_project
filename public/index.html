@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ranking Big 12 Teams with Linear Equations</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header>
+    <h1>Ranking Big 12 Football Teams with Linear Equations</h1>
+    <p class="subtitle">A demonstration of the Colley method: solving <var>Cr</var> = <var>b</var> for team ratings</p>
+  </header>
+
+  <main>
+    <section id="rankings-section">
+      <h2>Rankings</h2>
+      <p id="status" class="status">Loading rankings&hellip;</p>
+      <table id="rankings-table" hidden>
+        <caption>Ratings computed from the solution vector <var>r</var></caption>
+        <thead>
+          <tr>
+            <th scope="col" class="num">Rank</th>
+            <th scope="col">Team</th>
+            <th scope="col" class="num">Record</th>
+            <th scope="col" class="num">Rating</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <p class="note">
+        The games used here are a simplified, illustrative dataset of eight Big 12
+        teams. They are not the real schedule or results.
+      </p>
+    </section>
+
+    <section id="method-section">
+      <h2>How the linear system <var>Ax</var> = <var>b</var> produces the ranking</h2>
+
+      <p>
+        Each team <var>i</var> gets an unknown rating <var>r<sub>i</sub></var>. With
+        <var>n</var> teams there are <var>n</var> unknowns, and the Colley method supplies
+        <var>n</var> linear equations, one per team. In matrix form the system is
+      </p>
+
+      <p class="equation"><var>C r</var> = <var>b</var></p>
+
+      <p>
+        (the same shape as <var>Ax</var> = <var>b</var>, with <var>C</var> as the coefficient
+        matrix and <var>r</var> as the unknown vector).
+      </p>
+
+      <h3>Where the equations come from</h3>
+      <p>
+        Let <var>w<sub>i</sub></var> and <var>l<sub>i</sub></var> be the wins and losses of
+        team <var>i</var>, and <var>t<sub>i</sub></var> = <var>w<sub>i</sub></var> +
+        <var>l<sub>i</sub></var> its games played. A simple starting estimate is
+        <var>r<sub>i</sub></var> = (1 + <var>w<sub>i</sub></var>) / (2 + <var>t<sub>i</sub></var>).
+        Writing <var>w<sub>i</sub></var> = (<var>w<sub>i</sub></var> &minus; <var>l<sub>i</sub></var>)/2
+        + <var>t<sub>i</sub></var>/2, and replacing the average opponent rating of 1/2 by the
+        sum of the actual ratings of the opponents faced, gives one equation per team:
+      </p>
+
+      <p class="equation">
+        (2 + <var>t<sub>i</sub></var>) <var>r<sub>i</sub></var>
+        &minus; &Sigma;<sub><var>j</var> &isin; opponents of <var>i</var></sub> <var>r<sub>j</sub></var>
+        = 1 + (<var>w<sub>i</sub></var> &minus; <var>l<sub>i</sub></var>) / 2
+      </p>
+
+      <p>Collecting these equations gives the matrix entries:</p>
+      <ul>
+        <li><var>C<sub>ii</sub></var> = 2 + <var>t<sub>i</sub></var> (diagonal)</li>
+        <li><var>C<sub>ij</sub></var> = &minus;(number of games between teams <var>i</var> and <var>j</var>) (off-diagonal)</li>
+        <li><var>b<sub>i</sub></var> = 1 + (<var>w<sub>i</sub></var> &minus; <var>l<sub>i</sub></var>) / 2</li>
+      </ul>
+
+      <p>
+        <var>C</var> is symmetric and strictly diagonally dominant, so it is invertible and
+        the system has exactly one solution. Solving it (here with NumPy&rsquo;s
+        <code>linalg.solve</code>) gives the rating vector <var>r</var>; sorting the
+        entries from largest to smallest gives the ranking. Each rating lies between 0 and 1,
+        and the ratings always sum to <var>n</var>/2, which is used below as a check.
+      </p>
+
+      <h3>The system for this dataset</h3>
+      <p id="matrix-status" class="status">Loading system&hellip;</p>
+      <div id="matrix-wrap" class="table-scroll" hidden>
+        <table id="matrix-table" class="matrix"></table>
+      </div>
+
+      <p id="checks" class="note"></p>
+
+      <details id="games-details" hidden>
+        <summary>Games used (winner defeated loser)</summary>
+        <ol id="games-list"></ol>
+      </details>
+    </section>
+  </main>
+
+  <footer>
+    <p>Python (Flask, NumPy) backend &middot; plain HTML, CSS, and JavaScript frontend</p>
+  </footer>
+
+  <script src="/script.js"></script>
+</body>
+</html>
