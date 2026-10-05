@@ -11,7 +11,10 @@ from flask import Flask, jsonify, render_template
 
 from lin_eqt import compute_rankings
 
-app = Flask(__name__)
+# On Vercel, files in public/ are served by the CDN at the site root
+# (public/style.css -> /style.css). Pointing Flask at the same folder makes
+# `python app.py` behave identically when running locally.
+app = Flask(__name__, static_folder="public", static_url_path="")
 
 
 @app.route("/")
